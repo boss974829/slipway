@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Sora", "Avenir Next", "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --color-bg: #07111f;
+  --color-surface: #0d1c3366;
+  --color-surface-2: #12243d;
+  --color-fg: #e7eef8;
+  --color-muted: #8ea0b8;
+  --color-line: #2a4364;
+  --color-accent: #6cb6ff;
+  --color-accent-ink: #041018;
+  --radius-card: 1.25rem;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    background: var(--color-bg);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    font-weight: 600;
+    line-height: 1.5;
+  }
+
+  h1,
+  h2,
+  .text-3xl,
+  .text-4xl,
+  .text-5xl,
+  .text-6xl {
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    background-image: linear-gradient(
+      105deg,
+      rgba(57, 255, 20, 0.55) 0%,
+      rgba(198, 255, 74, 0.72) 32%,
+      rgba(244, 255, 228, 0.88) 50%,
+      rgba(125, 255, 42, 0.7) 68%,
+      rgba(57, 255, 20, 0.55) 100%
+    );
+    background-size: 240% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .font-mono {
+    font-weight: 600;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled),
+  summary {
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  .bg-surface {
+    backdrop-filter: blur(22px) saturate(1.5);
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-fg) 18%, transparent);
+  }
+
+  canvas.playfield {
+    touch-action: none;
+    display: block;
+    width: 100%;
+    height: auto;
+    background: var(--color-bg);
+    border-radius: var(--radius-card);
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-fg) 12%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+body {
+  color: rgba(182, 255, 74, 0.72);
+}
+
+.text-fg {
+  color: rgba(212, 255, 106, 0.75);
+}
+
+.text-muted {
+  color: rgba(125, 255, 60, 0.62);
+}
+
+.text-accent {
+  color: rgba(57, 255, 20, 0.7);
+}
+
+h1,
+h2,
+.text-3xl,
+.text-4xl,
+.text-5xl,
+.text-6xl {
+  color: transparent !important;
+  background-image: linear-gradient(
+    105deg,
+    rgba(57, 255, 20, 0.55) 0%,
+    rgba(198, 255, 74, 0.72) 32%,
+    rgba(244, 255, 228, 0.88) 50%,
+    rgba(125, 255, 42, 0.7) 68%,
+    rgba(57, 255, 20, 0.55) 100%
+  );
+  background-size: 240% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+}

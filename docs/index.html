@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Meshline</title>
+    <meta
+      name="description"
+      content="Hold a harbor city's fiber mesh. Play Razor or Keel for twelve cables."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,560;9..144,640&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #12140f;
+        --surface: #1b1f16;
+        --surface-2: #24291d;
+        --fg: #e7e4d8;
+        --muted: #8a9178;
+        --line: #34392c;
+        --accent: #c6f04a;
+        --ink: #1a2208;
+        --card: 1.1rem;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: "IBM Plex Mono", ui-monospace, monospace;
+        line-height: 1.5;
+      }
+      button, summary { cursor: pointer; font: inherit; color: inherit; }
+      button:disabled { cursor: default; opacity: 0.4; }
+      :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+      h1, h2, h3, .serif { font-family: Fraunces, Palatino, serif; font-weight: 560; }
+      .wrap { max-width: 64rem; margin: 0 auto; padding: 1.25rem 1rem 3rem; }
+      .kicker { font-size: 0.75rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+      .accent { color: var(--accent); }
+      h1 { font-size: clamp(2.6rem, 7vw, 4.2rem); line-height: 0.95; margin: 0.6rem 0 0; }
+      .lede { max-width: 38rem; color: var(--muted); }
+      label { display: block; margin-top: 1.5rem; }
+      input {
+        width: min(100%, 24rem);
+        margin-top: 0.4rem;
+        background: var(--surface);
+        color: var(--fg);
+        border: 1px solid var(--line);
+        border-radius: var(--card);
+        padding: 0.75rem 1rem;
+      }
+      .roles { display: grid; gap: 0.75rem; margin-top: 1rem; }
+      @media (min-width: 720px) { .roles { grid-template-columns: repeat(3, 1fr); } }
+      .card, .relay, .act, .ghost, .go {
+        border-radius: var(--card);
+        border: 1px solid var(--line);
+        background: var(--surface);
+        text-align: left;
+      }
+      .card, .relay, .act, .ghost { padding: 0.9rem 1rem; }
+      .card.on, .relay.on { border-color: var(--accent); background: var(--surface-2); }
+      .card strong, .relay strong { display: block; font-family: Fraunces, Palatino, serif; font-size: 1.35rem; font-weight: 560; }
+      .card span, .hint { display: block; margin-top: 0.4rem; color: var(--muted); font-size: 0.9rem; }
+      .row { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; margin-top: 1.4rem; }
+      .go {
+        background: var(--accent);
+        color: var(--ink);
+        border: 0;
+        padding: 0.8rem 1.1rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+      }
+      header.bar { display: flex; justify-content: space-between; gap: 1rem; align-items: end; flex-wrap: wrap; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+      .court { display: grid; gap: 1rem; margin-top: 1rem; }
+      @media (min-width: 960px) { .court { grid-template-columns: minmax(0, 1fr) 20rem; } }
+      .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+      @media (min-width: 640px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+      .relay { min-height: 7.5rem; display: flex; flex-direction: column; }
+      .meta { display: flex; justify-content: space-between; gap: 0.5rem; }
+      .barline { margin-top: auto; height: 4px; background: var(--line); border-radius: 99px; overflow: hidden; }
+      .barline i { display: block; height: 100%; background: var(--accent); }
+      .relay.open .barline i { background: var(--muted); }
+      .log { margin-top: 0.8rem; max-height: 13rem; overflow: auto; border: 1px solid var(--line); border-radius: var(--card); padding: 0.8rem 1rem; background: var(--surface); }
+      .log li { color: var(--muted); font-size: 0.75rem; margin: 0.25rem 0; }
+      .side { display: flex; flex-direction: column; gap: 0.6rem; }
+      .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+      .stats div { background: var(--surface-2); border-radius: var(--card); padding: 0.55rem 0.7rem; }
+      .pips { display: flex; gap: 0.25rem; align-items: center; }
+      .pips i { width: 0.6rem; height: 0.6rem; border-radius: 99px; background: var(--line); display: block; }
+      .pips i.on { background: var(--accent); }
+      .heat { flex: 1; min-width: 10rem; }
+      .heat b { display: block; height: 6px; background: var(--line); border-radius: 99px; margin-top: 0.3rem; }
+      .heat b i { display: block; height: 100%; background: var(--accent); }
+      .meters { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-top: 0.8rem; }
+      .leave { background: none; border: 0; padding: 0; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; font-size: 0.72rem; }
+      @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+    </style>
+  </head>
+  <body>
+    <div class="wrap" id="app"></div>
+    <script>
+      const RELAYS = [
+        ["harbor", "Harbor Gate", "Docks", true, "The undersea cable comes ashore here."],
+        ["vault", "Cold Vault", "Records", true, "City ledgers sit on a chilled rack."],
+        ["switch", "Switchyard", "Rail", false, "Signal boxes along the freight spine."],
+        ["beacon", "Beacon", "Headland", false, "Weather radio and the pilot channel."],
+        ["archive", "Archive Stack", "Library", false, "Public memory on a tired rack."],
+        ["clinic", "Night Clinic", "Ward", true, "After-hours charts and the paging line."],
+        ["exchange", "Exchange", "Market", false, "The morning price feed."],
+        ["tower", "Hill Tower", "Civic", true, "The mesh's high site over the roofs."],
+        ["pier", "Pier Shed", "Wharf", false, "Cameras trained on the loading doors."],
+      ];
+      const INFO = Object.fromEntries(RELAYS.map((r) => [r[0], { id: r[0], name: r[1], district: r[2], critical: r[3], note: r[4] }]));
+      const ACTIONS = {
+        chart: { label: "Chart", cost: 1, hint: "Mark a relay so it can be cut or taken.", side: "razor" },
+        shear: { label: "Shear", cost: 3, hint: "Cut a charted relay. A lure springs. A plate glances.", side: "razor" },
+        take: { label: "Take", cost: 3, hint: "Seize a charted relay at 40 integrity or less.", side: "razor" },
+        mend: { label: "Mend", cost: 1, hint: "Restore 26 integrity on any relay.", side: "keel" },
+        seal: { label: "Seal", cost: 2, hint: "Raise a plate. The next shear mostly glances.", side: "keel" },
+        lure: { label: "Lure", cost: 2, hint: "Trap the next shear. It deals no cut.", side: "keel" },
+        anchor: { label: "Anchor", cost: 3, hint: "Claim a steady relay, 62 integrity or higher.", side: "keel" },
+      };
+      const SIDE = { razor: ["chart", "shear", "take"], keel: ["mend", "seal", "lure", "anchor"] };
+      const RIVALS = ["Nia Voss", "Calder Finch", "Jun Park", "Imani Ade"];
+      const CAP = 5;
+      const app = document.querySelector("#app");
+      let callsign = "";
+      let role = "razor";
+      let match = null;
+      let selected = "archive";
+      let running = false;
+      let timer = 0;
+      let best = Number(localStorage.getItem("meshline-best") || 0) || 0;
+
+      const roll = (seed) => {
+        let a = (seed + 0x6d2b79f5) | 0;
+        let t = Math.imul(a ^ (a >>> 15), 1 | a);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return { value: ((t ^ (t >>> 14)) >>> 0) / 4294967296, seed: a >>> 0 };
+      };
+      const hash = (text) => {
+        let h = 2166136261;
+        for (let i = 0; i < text.length; i++) { h ^= text.charCodeAt(i); h = Math.imul(h, 16777619); }
+        return h >>> 0;
+      };
+      const other = (s) => (s === "razor" ? "keel" : "razor");
+      const who = (m, s) => (m.human === s ? m.callsign : m.rival);
+      const owned = (m, owner) => m.relays.filter((r) => r.owner === owner).length;
+      const log = (m, tone, text) => ({ ...m, seq: m.seq + 1, log: [...m.log.slice(-23), { id: m.seq + 1, tone, text }] });
+      const patch = (m, id, fn) => ({ ...m, relays: m.relays.map((r) => (r.id === id ? fn(r) : r)) });
+
+      function illegal(m, side, id, action) {
+        if (m.phase === "end") return "The cable is closed.";
+        if (ACTIONS[action].side !== side) return "Wrong bench.";
+        const relay = m.relays.find((r) => r.id === id);
+        if (!relay) return "No such relay.";
+        if (m.bandwidth[side] < ACTIONS[action].cost) return "Not enough band.";
+        if (action === "chart" && relay.revealed) return "Already charted.";
+        if (action === "shear" && !relay.revealed) return "Chart it first.";
+        if (action === "shear" && relay.owner === "razor") return "Already yours.";
+        if (action === "take" && !relay.revealed) return "Chart it first.";
+        if (action === "take" && relay.owner === "razor") return "Already yours.";
+        if (action === "take" && relay.shielded) return "A plate is up.";
+        if (action === "take" && relay.integrity > 40) return "Still too solid.";
+        if (action === "mend" && relay.integrity >= 100) return "Nothing to mend.";
+        if (action === "seal" && relay.shielded) return "Already plated.";
+        if (action === "lure" && relay.decoy) return "A lure is already set.";
+        if (action === "anchor" && relay.owner === "keel") return "Already held.";
+        if (action === "anchor" && relay.integrity < 62) return "Too shaken to anchor.";
+        if (action === "anchor" && relay.shielded && relay.owner === "razor") return "A plate is up.";
+        return null;
+      }
+
+      function spend(m, side, action, heat) {
+        return {
+          ...m,
+          bandwidth: { ...m.bandwidth, [side]: m.bandwidth[side] - ACTIONS[action].cost },
+          heat: { ...m.heat, [side]: Math.min(140, m.heat[side] + heat) },
+        };
+      }
+
+      function apply(m, side, action, id) {
+        const relay = m.relays.find((r) => r.id === id);
+        const name = INFO[id].name;
+        const actor = who(m, side);
+        if (action === "chart") return log(patch(spend(m, side, action, 3), id, (r) => ({ ...r, revealed: true })), side, `${actor} charts ${name}.`);
+        if (action === "shear") {
+          if (relay.decoy) return log(patch(spend(m, side, action, 22), id, (r) => ({ ...r, decoy: false })), side, `${actor} shears ${name}. The lure answers. No cut.`);
+          if (relay.shielded) {
+            const integrity = Math.max(0, relay.integrity - 8);
+            return log(patch(spend(m, side, action, 10), id, (r) => ({ ...r, shielded: false, integrity })), side, `${actor} shears ${name}. The plate glances, then drops.`);
+          }
+          const integrity = Math.max(0, relay.integrity - 28);
+          return log(patch(spend(m, side, action, 14), id, (r) => ({ ...r, integrity })), side, `${actor} shears ${name} down to ${integrity}.`);
+        }
+        if (action === "take") return log(patch(spend(m, side, action, 10), id, (r) => ({ ...r, owner: "razor", integrity: 64, decoy: false, shielded: false })), side, `${actor} takes ${name}.`);
+        if (action === "mend") {
+          const integrity = Math.min(100, relay.integrity + 26);
+          return log(patch(spend(m, side, action, 2), id, (r) => ({ ...r, integrity })), side, `${actor} mends ${name} to ${integrity}.`);
+        }
+        if (action === "seal") return log(patch(spend(m, side, action, 5), id, (r) => ({ ...r, shielded: true })), side, `${actor} seals ${name}.`);
+        if (action === "lure") return log(patch(spend(m, side, action, 6), id, (r) => ({ ...r, decoy: true })), side, `${actor} sets a lure on ${name}.`);
+        return log(patch(spend(m, side, action, 8), id, (r) => ({ ...r, owner: "keel", shielded: false, decoy: false })), side, `${actor} anchors ${name}.`);
+      }
+
+      function judge(m, timed) {
+        const razor = owned(m, "razor");
+        const keel = owned(m, "keel");
+        if (razor >= 5 && keel >= 5) return { winner: "draw", reason: "Both benches crossed five relays at once." };
+        if (razor >= 5) return { winner: "razor", reason: "Razor holds five relays." };
+        if (keel >= 5) return { winner: "keel", reason: "Keel holds five relays." };
+        if (!timed) return null;
+        if (razor === keel) return { winner: "draw", reason: "Twelve cables. The mesh stays split." };
+        return razor > keel
+          ? { winner: "razor", reason: "Time. Razor holds more of the mesh." }
+          : { winner: "keel", reason: "Time. Keel holds more of the mesh." };
+      }
+      const closeIf = (m, timed) => {
+        const verdict = judge(m, timed);
+        return verdict ? { ...m, phase: "end", winner: verdict.winner, reason: verdict.reason } : m;
+      };
+
+      function choose(m, side) {
+        let best = null;
+        for (const relay of m.relays) {
+          for (const action of SIDE[side]) {
+            if (illegal(m, side, relay.id, action)) continue;
+            let score = 0;
+            const info = INFO[relay.id];
+            if (action === "take") score = 120 + (info.critical ? 10 : 0);
+            if (action === "anchor") score = 100 + (info.critical ? 20 : 0) - relay.integrity / 10;
+            if (action === "shear") {
+              score = 110 - relay.integrity + (info.critical ? 12 : 0);
+              if (relay.decoy) score = 8;
+              if (relay.shielded) score = 18;
+            }
+            if (action === "chart") score = (info.critical ? 46 : 24) + (100 - relay.integrity) / 8;
+            if (action === "mend") {
+              score = relay.integrity < 48 ? 64 - relay.integrity : 0;
+              if (relay.integrity <= 40) score += 36;
+              if (info.critical) score += 14;
+            }
+            if (action === "seal") score = (relay.revealed && relay.owner !== "razor" ? 36 : 12) + (info.critical ? 10 : 0);
+            if (action === "lure") score = relay.revealed && relay.integrity <= 70 && relay.owner !== "razor" ? 44 : 8;
+            if (score <= 0) continue;
+            if (!best || score > best.score) best = { id: relay.id, action, score };
+          }
+        }
+        return best;
+      }
+
+      function runSide(m, side, action, id) {
+        if (m.phase === "end") return m;
+        const actor = who(m, side);
+        if (m.heat[side] >= 100) return log({ ...m, heat: { ...m.heat, [side]: 36 } }, "note", `${actor} sits out. The bench cools.`);
+        if (action && id) {
+          if (illegal(m, side, id, action)) return m;
+          return closeIf(apply(m, side, action, id), false);
+        }
+        const pick = choose(m, side);
+        if (!pick) return log(m, "note", `${actor} holds.`);
+        return closeIf(apply(m, side, pick.action, pick.id), false);
+      }
+      function tick(m) {
+        const bandwidth = {
+          razor: Math.min(CAP, m.bandwidth.razor + 2),
+          keel: Math.min(CAP, m.bandwidth.keel + 2),
+        };
+        const round = m.round + 1;
+        return closeIf({ ...m, bandwidth, round }, round > m.maxRounds);
+      }
+      function createMatch(name, picked) {
+        const call = name.trim().slice(0, 18) || "Unlisted";
+        let rng = hash(`${call}:${picked}:${Date.now()}`) || 1;
+        const spun = roll(rng);
+        rng = spun.seed;
+        const rival = RIVALS[Math.floor(spun.value * RIVALS.length) % RIVALS.length];
+        const relays = RELAYS.map((info) => {
+          const next = roll(rng);
+          rng = next.seed;
+          let integrity = 58 + Math.floor(next.value * 28);
+          let owner = "open";
+          let revealed = false;
+          if (info[0] === "switch") { owner = "razor"; integrity = 60; }
+          if (info[0] === "pier") { owner = "keel"; integrity = 80; }
+          if (info[0] === "archive") { revealed = true; integrity = 50; }
+          return { id: info[0], owner, integrity, shielded: false, decoy: false, revealed };
+        });
+        const human = picked === "gallery" ? null : picked;
+        return log({
+          callsign: call, rival, role: picked, human, round: 1, maxRounds: 12, next: "razor",
+          bandwidth: { razor: CAP, keel: CAP }, heat: { razor: 0, keel: 0 }, relays, log: [], seq: 0,
+          phase: "play", winner: null, reason: "", rng,
+        }, "note", human ? `${call} takes the ${human} bench. ${rival} answers across the cable.` : `Gallery open. ${rival} is on the wire with the city benches.`);
+      }
+      function playHuman(m, action, id) {
+        if (!m.human || m.phase === "end") return m;
+        let next = runSide(m, m.human, action === "cool" ? null : action, action === "cool" ? null : id);
+        if (next.phase === "end") return next;
+        next = runSide(next, other(m.human), null, null);
+        if (next.phase === "end") return next;
+        return tick(next);
+      }
+      function stepGallery(m) {
+        if (m.human || m.phase === "end") return m;
+        let next = runSide(m, m.next, null, null);
+        if (next.phase === "end") return next;
+        const finishedKeel = m.next === "keel";
+        next = { ...next, next: other(m.next) };
+        return finishedKeel ? tick(next) : next;
+      }
+      function scoreFor(m, side) {
+        const bonus = m.winner === side ? 40 : m.winner === "draw" ? 12 : 0;
+        return owned(m, side) * 8 + bonus + Math.max(0, m.maxRounds - m.round);
+      }
+      function remember() {
+        if (!match || match.phase !== "end" || !match.human || !match.winner) return;
+        const score = scoreFor(match, match.human);
+        if (score > best) {
+          best = score;
+          localStorage.setItem("meshline-best", String(score));
+        }
+      }
+
+      const widthBar = (value) => {
+        const node = document.createElement("i");
+        node.style.width = `${value}%`;
+        return node;
+      };
+      const el = (tag, attrs, kids) => {
+        const node = document.createElement(tag);
+        for (const [key, value] of Object.entries(attrs || {})) {
+          if (key === "class") node.className = value;
+          else if (key.startsWith("on")) node.addEventListener(key.slice(2).toLowerCase(), value);
+          else if (value != null) node.setAttribute(key, value);
+        }
+        for (const kid of kids || []) node.append(kid && kid.nodeType ? kid : document.createTextNode(kid ?? ""));
+        return node;
+      };
+
+      function draw() {
+        remember();
+        app.replaceChildren();
+        if (!match) return drawBrief();
+        drawCourt();
+      }
+      function drawBrief() {
+        const roles = [
+          ["razor", "Razor", "Chart a relay, shear it open, then take it. Heat climbs when you cut."],
+          ["keel", "Keel", "Mend what shakes, plate the obvious cut, lure the greedy shear, anchor what is steady."],
+          ["gallery", "Gallery", "Watch both benches run the evening cable. Step it, or let it play."],
+        ];
+        app.append(
+          el("p", { class: "kicker" }, ["Meshline · field desk"]),
+          el("p", { class: "kicker accent", style: "margin-top:2.2rem" }, ["Evening cable"]),
+          el("h1", {}, ["Hold the fiber. Spend the heat."]),
+          el("p", { class: "lede" }, ["Nine relays tie a harbor city together. Razor cuts and takes. Keel mends, plates, and anchors. Five relays win the night."]),
+          el("label", {}, [
+            el("span", { class: "kicker" }, ["Callsign"]),
+            Object.assign(el("input", { maxlength: "18", placeholder: "Unlisted" }), { value: callsign }),
+          ]),
+          el("div", { class: "roles" }, roles.map(([id, title, copy]) =>
+            el("button", { class: `card${role === id ? " on" : ""}`, type: "button", onClick: () => { role = id; draw(); } }, [
+              el("strong", {}, [title]),
+              el("span", {}, [copy]),
+            ]),
+          )),
+          el("div", { class: "row" }, [
+            el("button", { class: "go", type: "button", onClick: () => { match = createMatch(callsign, role); selected = "archive"; running = false; draw(); } }, ["Open the court"]),
+            el("span", { class: "kicker" }, [`Best mark ${best}`]),
+          ]),
+        );
+        const input = app.querySelector("input");
+        input.addEventListener("input", (event) => { callsign = event.target.value; });
+      }
+      function pips(value, label) {
+        return el("div", { class: "pips" }, [
+          el("span", { class: "kicker" }, [label]),
+          ...Array.from({ length: CAP }, (_, i) => el("i", { class: i < value ? "on" : "" })),
+        ]);
+      }
+      function drawCourt() {
+        const relay = match.relays.find((r) => r.id === selected) || match.relays[0];
+        const info = INFO[relay.id];
+        const human = match.human;
+        const locked = human && match.heat[human] >= 100 && match.phase === "play";
+        const head = el("header", { class: "bar" }, [
+          el("div", {}, [
+            el("p", { class: "kicker accent" }, [`Cable ${Math.min(match.round, match.maxRounds)} / ${match.maxRounds}`]),
+            el("h1", { style: "font-size:2rem" }, [`${match.callsign} · ${match.role}`]),
+          ]),
+          el("p", { class: "kicker" }, [`Razor ${owned(match, "razor")} · Open ${owned(match, "open")} · Keel ${owned(match, "keel")}`]),
+        ]);
+        const meters = el("div", { class: "meters" });
+        if (human) {
+          meters.append(pips(match.bandwidth[human], "Band"));
+          const heat = Math.min(100, match.heat[human]);
+          meters.append(el("div", { class: "heat" }, [
+            el("div", { class: "meta" }, [el("span", { class: "kicker" }, ["Heat"]), el("span", { class: "kicker" }, [String(heat)])]),
+            el("b", {}, [widthBar(heat)]),
+          ]));
+        } else meters.append(pips(match.bandwidth.razor, "Razor"), pips(match.bandwidth.keel, "Keel"));
+
+        const grid = el("div", { class: "grid" }, match.relays.map((item) => {
+          const meta = INFO[item.id];
+          const tags = [item.revealed ? "Charted" : "Dark", item.shielded ? "Plate" : "", item.decoy ? "Lure" : ""].filter(Boolean).join(" · ");
+          return el("button", { class: `relay${item.id === selected ? " on" : ""}${item.owner === "open" ? " open" : ""}`, type: "button", onClick: () => { selected = item.id; draw(); } }, [
+            el("span", { class: "kicker meta" }, [el("span", {}, [meta.district]), meta.critical ? el("span", { class: "accent" }, ["Key"]) : ""]),
+            el("strong", {}, [meta.name]),
+            el("span", { class: "kicker meta" }, [el("span", {}, [item.owner === "open" ? "Open" : item.owner === "razor" ? "Razor" : "Keel"]), el("span", {}, [String(item.integrity)])]),
+            el("span", { class: "barline" }, [widthBar(item.integrity)]),
+            el("span", { class: "kicker" }, [tags]),
+          ]);
+        }));
+        const tape = el("ol", { class: "log" }, match.log.map((line) => el("li", {}, [line.text])));
+        const side = el("aside", { class: "card side" }, [
+          el("p", { class: "kicker" }, [`${info.district}${info.critical ? " · key site" : ""}`]),
+          el("h2", { style: "margin:0;font-size:2rem" }, [info.name]),
+          el("p", { class: "hint" }, [info.note]),
+          el("div", { class: "stats" }, [
+            el("div", {}, [el("div", { class: "kicker" }, ["Held by"]), el("div", {}, [relay.owner === "open" ? "Open" : relay.owner === "razor" ? "Razor" : "Keel"])]),
+            el("div", {}, [el("div", { class: "kicker" }, ["Integrity"]), el("div", {}, [String(relay.integrity)])]),
+          ]),
+        ]);
+        if (match.phase === "end") {
+          const you = match.human;
+          const won = you && match.winner === you;
+          const title = !you
+            ? match.winner === "draw" ? "The mesh stays split." : `${match.winner === "razor" ? "Razor" : "Keel"} keeps the night.`
+            : won ? "The mesh answers." : match.winner === "draw" ? "Neither bench keeps it." : `${match.rival} holds the cable.`;
+          side.append(
+            el("h3", { style: "margin:0;font-size:2rem" }, [title]),
+            el("p", { class: "hint" }, [match.reason]),
+            you ? el("p", { class: "kicker accent" }, [`Mark ${scoreFor(match, you)}`]) : "",
+            el("button", { class: "go", type: "button", onClick: () => { running = false; match = createMatch(match.callsign, match.role); draw(); } }, ["Run it again"]),
+            el("button", { class: "ghost", type: "button", onClick: () => { running = false; match = null; draw(); } }, ["Change bench"]),
+          );
+        } else if (human) {
+          if (locked) side.append(el("button", { class: "go", type: "button", onClick: () => act("cool") }, ["Sit this cable"]));
+          else SIDE[human].forEach((action) => {
+            const why = illegal(match, human, relay.id, action);
+            side.append(el("button", { class: "act", type: "button", disabled: why ? "true" : null, onClick: () => act(action) }, [
+              el("span", { class: "meta" }, [el("strong", { style: "font-size:1.15rem" }, [ACTIONS[action].label]), el("span", { class: "kicker" }, [`${ACTIONS[action].cost} band`])]),
+              el("span", { class: "hint" }, [why || ACTIONS[action].hint]),
+            ]));
+          });
+          side.append(el("button", { class: "leave", type: "button", onClick: () => { match = null; draw(); } }, ["Leave the desk"]));
+        } else {
+          side.append(
+            el("button", { class: "go", type: "button", onClick: () => { running = false; match = stepGallery(match); draw(); } }, ["Step the cable"]),
+            el("button", { class: "ghost", type: "button", onClick: () => { running = !running; draw(); } }, [running ? "Pause" : "Let it run"]),
+            el("p", { class: "hint" }, [`Next bench: ${match.next}. Rival on the wire: ${match.rival}.`]),
+            el("button", { class: "leave", type: "button", onClick: () => { running = false; match = null; draw(); } }, ["Leave the desk"]),
+          );
+        }
+        side.append(el("details", {}, [el("summary", { class: "kicker" }, ["Field notes"]), el("p", { class: "hint" }, ["Razor must chart before a shear or a take. A take needs 40 integrity or less and no plate. Keel anchors at 62 or higher. Five relays end it."])]));
+        app.append(head, meters, el("div", { class: "court" }, [el("section", {}, [grid, tape]), side]));
+        tape.scrollTop = tape.scrollHeight;
+        clearTimeout(timer);
+        if (running && match && match.role === "gallery" && match.phase === "play") {
+          timer = setTimeout(() => { match = stepGallery(match); draw(); }, 700);
+        }
+      }
+      function act(action) {
+        match = playHuman(match, action, selected);
+        draw();
+      }
+      draw();
+    </script>
+  </body>
+</html>
