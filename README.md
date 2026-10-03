@@ -9,6 +9,8 @@ Four harbor games on one pier.
 | Eel | A lantern eel on the night grid. Eat the glow. Do not knot. |
 | Slip | Cross the pier. Ring every bell. |
 
+**Open the game:** [play Slipway](https://htmlpreview.github.io/?https://github.com/boss974829/slipway/blob/main/docs/index.html)
+
 **Repository:** [boss974829/slipway](https://github.com/boss974829/slipway)
 
 ## Play
