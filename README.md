@@ -1,3 +1,13 @@
+<p align="center">
+  <a href="https://htmlpreview.github.io/?https://github.com/boss974829/slipway/blob/main/docs/index.html">
+    <img src="https://boss974829.github.io/readme/slipway.gif" width="100%" alt="Slipway" />
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://htmlpreview.github.io/?https://github.com/boss974829/slipway/blob/main/docs/index.html"><strong>Play Slipway →</strong></a>
+</p>
+
 # Slipway
 
 Four harbor games on one pier.
